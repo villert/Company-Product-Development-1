@@ -10,3 +10,5 @@ export default StyleSheet.create({
     textAlign: "center"
   }
 })
+
+

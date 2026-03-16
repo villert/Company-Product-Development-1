@@ -1,5 +1,5 @@
 import { View, Text } from "react-native"
-import Themes from "./themes/Themes"
+import Themes from "../themes/Themes"
 
 export default function HomeScreen() {
   return (
