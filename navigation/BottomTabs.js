@@ -8,6 +8,7 @@ import ListScreen from "../screens/ListScreen"
 import MapScreen from "../screens/MapScreen"
 import ChatScreen from "../screens/ChatScreen"
 import SettingsScreen from "../screens/SettingsScreen"
+import { Image } from "react-native"
 
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
@@ -19,6 +20,15 @@ function AppHeader({ navigation }) {
         <TouchableOpacity onPress={() => navigation.navigate("Chat")}>
           <Text style={styles.headerBtn}>Chat</Text>
         </TouchableOpacity>
+
+           <View style={styles.logoContainer}>
+    <Image
+      source={require("../assets/Foodi_logo.png")}
+      style={styles.logo}
+      resizeMode="contain"
+    />
+  </View>
+
         <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
           <Text style={styles.headerBtn}>Settings</Text>
         </TouchableOpacity>
@@ -83,10 +93,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 48,
     backgroundColor: "#8dc9a4",
+    position: "relative",
   },
   headerBtn: {
     fontSize: 16,
     fontWeight: "600",
     color: "#333",
+    width: 80,
   },
+
+  logo: {
+  width: 100,
+  height: 50,
+  position: "absolute",
+  left: "50%",
+  transform: [{ translateX: -50 }],
+}
 })
