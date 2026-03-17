@@ -31,7 +31,7 @@ function TabNavigator({ navigation }) {
   return (
     <View style={{ flex: 1 }}>
       <AppHeader navigation={navigation} />
-      <Tab.Navigator
+      <Tab.Navigator initialRouteName="Home"
         screenOptions={({ route }) => ({
           headerShown: false,
           tabBarIcon: ({ color, size }) => {
