@@ -9,6 +9,7 @@ import MapScreen from "../screens/MapScreen"
 import ChatScreen from "../screens/ChatScreen"
 import SettingsScreen from "../screens/SettingsScreen"
 import { Image } from "react-native"
+import Auth from "../screens/Auth"
 
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
@@ -56,11 +57,11 @@ function TabNavigator({ navigation }) {
           tabBarStyle: {
             backgroundColor: "#8dc9a4",
             borderTopWidth: 0,
-            height: 60,
+            height: 100,
           },
         })}
       >
-        <Tab.Screen name="List" component={ListScreen} />
+        <Tab.Screen name="List" component={ListScreen} initialParams={{ restaurantName: null }} />
         <Tab.Screen name="Home" component={HomeScreen} />
         <Tab.Screen name="Map" component={MapScreen} />
         <Tab.Screen
