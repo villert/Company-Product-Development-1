@@ -1,17 +1,19 @@
+// screens/ListScreen.js
 import React from 'react'
 import { View, Text, ScrollView, StyleSheet } from 'react-native'
+import { useTheme } from '../context/ThemeContext'
 
 const MENUS = {
   Mara: [
-    { 
-      category: 'Vegetarian Lunch', 
+    {
+      category: 'Vegetarian Lunch',
       items: [
         { name: 'Black Bean Macaroni Casserole M, Mu, VEG, *, CONTAINS ORGANIC INGREDIENTS' },
         { name: 'Roasted Vegetables G, M, Mu, VEG, *' },
       ]
     },
-    { 
-      category: 'Lunch', 
+    {
+      category: 'Lunch',
       items: [
         { name: 'Cheesy Chicken Casserole G, L, Mu, *' },
         { name: 'Roasted Vegetables G, M, Mu, VEG, *' },
@@ -20,22 +22,22 @@ const MENUS = {
         { name: 'Roasted Vegetables G, M, Mu, VEG, *' },
       ]
     },
-    { 
-      category: 'Special Price Lunch', 
+    {
+      category: 'Special Price Lunch',
       items: [
         { name: 'Pan-Fried Steak L' },
         { name: 'Garlic Potatoes G, L, Mu, *' },
         { name: 'Mushroom Sauce G, L, Mu, CONTAINS ORGANIC INGREDIENTS' },
       ]
     },
-    { 
-      category: 'Dessert', 
+    {
+      category: 'Dessert',
       items: [
         { name: 'Mango Quark G, L, Mu' },
       ]
     },
-    { 
-      category: 'Salad and Soup', 
+    {
+      category: 'Salad and Soup',
       items: [
         { name: 'Chickpea Minestrone Soup G, M, Mu, VEG, *, CONTAINS ORGANIC INGREDIENTS' },
       ]
@@ -43,43 +45,45 @@ const MENUS = {
   ],
   Julinia: [
     { category: 'Starters', items: [
-      { name: 'Shrimp cocktail'},
-      { name: 'Caesar salad'},
+      { name: 'Shrimp cocktail' },
+      { name: 'Caesar salad' },
     ]},
     { category: 'Main Course', items: [
-      { name: 'Grilled pike-perch'},
-      { name: 'Rack of lamb'},
-      { name: 'Pasta primavera'},
+      { name: 'Grilled pike-perch' },
+      { name: 'Rack of lamb' },
+      { name: 'Pasta primavera' },
     ]},
     { category: 'Desserts', items: [
-      { name: 'Creme brulee'},
-      { name: 'Sorbet'},
+      { name: 'Creme brulee' },
+      { name: 'Sorbet' },
     ]},
   ],
 }
 
 export default function ListScreen({ route }) {
+  const { colors } = useTheme()
   const restaurantName = route?.params?.restaurantName
 
   if (!restaurantName) {
     return (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>Select a restaurant from Home to see its menu.</Text>
+      <View style={[styles.emptyContainer, { backgroundColor: colors.background }]}>
+        <Text style={[styles.emptyText, { color: colors.subText }]}>
+          Select a restaurant from Home to see its menu.
+        </Text>
       </View>
     )
   }
 
   const menu = MENUS[restaurantName]
-
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>{restaurantName}</Text>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.header, { color: colors.headerText }]}>{restaurantName}</Text>
       {menu.map((section, sectionIndex) => (
-        <View key={`${section.category}-${sectionIndex}`} style={styles.section}>
-          <Text style={styles.category}>{section.category}</Text>
+        <View key={`${section.category}-${sectionIndex}`} style={[styles.section, { backgroundColor: colors.sectionBg }]}>
+          <Text style={[styles.category, { color: colors.categoryText }]}>{section.category}</Text>
           {section.items.map((item, itemIndex) => (
-            <View key={`${section.category}-${itemIndex}`} style={styles.row}>
-              <Text style={styles.itemName}>{item.name}</Text>
+            <View key={`${section.category}-${itemIndex}`} style={[styles.row, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.itemName, { color: colors.text }]}>{item.name}</Text>
             </View>
           ))}
         </View>
@@ -89,12 +93,12 @@ export default function ListScreen({ route }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#d6f9df', padding: 16 },
-  emptyContainer: { flex: 1, backgroundColor: '#d6f9df', justifyContent: 'center', alignItems: 'center', padding: 32 },
-  emptyText: { fontSize: 16, color: '#555', textAlign: 'center' },
-  header: { fontSize: 24, fontWeight: 'bold', color: '#1a3a1a', textAlign: 'center', marginTop: 16, marginBottom: 20 },
-  section: { backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 12, elevation: 2 },
-  category: { fontSize: 16, fontWeight: 'bold', color: '#2e7d32', marginBottom: 10 },
-  row: { paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
-  itemName: { fontSize: 14, color: '#222' },
+  container: { flex: 1, padding: 16 },
+  emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
+  emptyText: { fontSize: 16, textAlign: 'center' },
+  header: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginTop: 16, marginBottom: 20 },
+  section: { borderRadius: 12, padding: 14, marginBottom: 12, elevation: 2 },
+  category: { fontSize: 16, fontWeight: 'bold', marginBottom: 10 },
+  row: { paddingVertical: 6, borderBottomWidth: 1 },
+  itemName: { fontSize: 14 },
 })

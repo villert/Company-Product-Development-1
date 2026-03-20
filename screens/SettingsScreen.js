@@ -1,14 +1,15 @@
+// screens/SettingsScreen.js
 import React, { useEffect, useState } from "react"
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  TextInput, ActivityIndicator, Alert
+  TextInput, ActivityIndicator, Alert, Switch
 } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore"
 import { getAuth } from "firebase/auth"
 import { firebaseApp } from "../firebase"
-import Themes from "../themes/Themes"
+import { useTheme } from "../context/ThemeContext"
 
 const db = getFirestore(firebaseApp)
 const auth = getAuth(firebaseApp)
@@ -37,6 +38,7 @@ function Avatar({ name, size = 84 }) {
 
 export default function SettingsScreen() {
   const navigation = useNavigation()
+  const { colors, isDark, toggleTheme } = useTheme()
   const [name, setName] = useState("")
   const [editingName, setEditingName] = useState(false)
   const [draftName, setDraftName] = useState("")
@@ -48,9 +50,7 @@ export default function SettingsScreen() {
     if (!uid) return
     const fetchProfile = async () => {
       const snap = await getDoc(doc(db, "users", uid))
-      if (snap.exists()) {
-        setName(snap.data().name || "Guest")
-      }
+      if (snap.exists()) setName(snap.data().name || "Guest")
     }
     fetchProfile()
   }, [uid])
@@ -69,69 +69,68 @@ export default function SettingsScreen() {
     }
   }
 
-  const handleStartEdit = () => {
-    setDraftName(name)
-    setEditingName(true)
-  }
-
-  const handleCancel = () => {
-    setEditingName(false)
-    setDraftName("")
-  }
+  const handleStartEdit = () => { setDraftName(name); setEditingName(true) }
+  const handleCancel = () => { setEditingName(false); setDraftName("") }
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={["left", "right"]}>
+    <SafeAreaView style={[{ flex: 1 }, { backgroundColor: colors.background }]} edges={["left", "right"]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.header }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backBtn}>Back</Text>
+          <Text style={[styles.backBtn, { color: colors.headerText }]}>Back</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Settings</Text>
+        <Text style={[styles.title, { color: colors.headerText }]}>Settings</Text>
         <View style={{ width: 50 }} />
       </View>
 
       {/* Profile section */}
-      <View style={styles.profileSection}>
-        <Avatar name={name} size={84} />
+      <View style={[styles.profileSection, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <Avatar name={uid ? name : "Guest"} size={84} />
 
         {!uid ? (
-          // Guest — not logged in
           <View style={styles.nameRow}>
-            <Text style={styles.nameText}>Guest</Text>
-            <Text style={styles.editHint}>Log in to edit your profile</Text>
+            <Text style={[styles.nameText, { color: colors.text }]}>Guest</Text>
+            <Text style={[styles.editHint, { color: colors.hint }]}>Log in to edit your profile</Text>
           </View>
         ) : editingName ? (
           <View style={styles.nameEditRow}>
             <TextInput
               value={draftName}
               onChangeText={setDraftName}
-              style={styles.nameInput}
+              style={[styles.nameInput, { borderColor: colors.myBubble, color: colors.text, backgroundColor: colors.inputBg }]}
               autoFocus
               maxLength={40}
               returnKeyType="done"
               onSubmitEditing={handleSaveName}
+              placeholderTextColor={colors.hint}
             />
-            <TouchableOpacity onPress={handleSaveName} disabled={saving} style={styles.saveBtn}>
+            <TouchableOpacity onPress={handleSaveName} disabled={saving} style={[styles.saveBtn, { backgroundColor: colors.myBubble }]}>
               {saving
                 ? <ActivityIndicator color="#fff" size="small" />
                 : <Text style={styles.saveBtnText}>Save</Text>
               }
             </TouchableOpacity>
             <TouchableOpacity onPress={handleCancel} style={styles.cancelBtn}>
-              <Text style={styles.cancelBtnText}>Cancel</Text>
+              <Text style={[styles.cancelBtnText, { color: colors.hint }]}>Cancel</Text>
             </TouchableOpacity>
           </View>
         ) : (
           <TouchableOpacity onPress={handleStartEdit} style={styles.nameRow}>
-            <Text style={styles.nameText}>{name}</Text>
-            <Text style={styles.editHint}>✏️ tap to edit</Text>
+            <Text style={[styles.nameText, { color: colors.text }]}>{name}</Text>
+            <Text style={[styles.editHint, { color: colors.hint }]}>✏️ tap to edit</Text>
           </TouchableOpacity>
         )}
       </View>
 
-      {/* Rest of settings */}
-      <View style={Themes.centeredContainer}>
-        <Text style={Themes.centeredText}>More settings coming soon</Text>
+      {/* Dark mode toggle */}
+      <View style={[styles.settingRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <Text style={[styles.settingLabel, { color: colors.text }]}>Dark Mode</Text>
+        <Switch
+          value={isDark}
+          onValueChange={toggleTheme}
+          trackColor={{ false: '#ccc', true: colors.myBubble }}
+          thumbColor={isDark ? colors.headerText : '#fff'}
+        />
       </View>
     </SafeAreaView>
   )
@@ -144,23 +143,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 48,
-    backgroundColor: "#8dc9a4",
   },
-  backBtn: { fontSize: 16, color: "#333", fontWeight: "600" },
+  backBtn: { fontSize: 16, fontWeight: "600" },
   title: { fontSize: 18, fontWeight: "600" },
 
   profileSection: {
     alignItems: "center",
     paddingVertical: 28,
     borderBottomWidth: 1,
-    borderColor: "#eee",
-    backgroundColor: "#fff",
     gap: 14,
   },
 
   nameRow: { alignItems: "center", gap: 4 },
-  nameText: { fontSize: 20, fontWeight: "700", color: "#222" },
-  editHint: { fontSize: 12, color: "#999" },
+  nameText: { fontSize: 20, fontWeight: "700" },
+  editHint: { fontSize: 12 },
 
   nameEditRow: {
     flexDirection: "row",
@@ -171,20 +167,29 @@ const styles = StyleSheet.create({
   nameInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: "#8dc9a4",
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 16,
-    color: "#222",
   },
   saveBtn: {
-    backgroundColor: "#8dc9a4",
     paddingHorizontal: 14,
     paddingVertical: 9,
     borderRadius: 8,
   },
   saveBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
   cancelBtn: { paddingHorizontal: 8, paddingVertical: 9 },
-  cancelBtnText: { color: "#999", fontSize: 14 },
+  cancelBtnText: { fontSize: 14 },
+
+  settingRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    marginTop: 12,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+  },
+  settingLabel: { fontSize: 16, fontWeight: "500" },
 })

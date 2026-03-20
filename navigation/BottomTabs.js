@@ -1,5 +1,5 @@
 import React from "react"
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from "react-native"
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Image } from "react-native"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { Ionicons } from "@expo/vector-icons"
@@ -8,30 +8,29 @@ import ListScreen from "../screens/ListScreen"
 import MapScreen from "../screens/MapScreen"
 import ChatScreen from "../screens/ChatScreen"
 import SettingsScreen from "../screens/SettingsScreen"
-import { Image } from "react-native"
 import Auth from "../screens/Auth"
+import { useTheme } from "../context/ThemeContext"
 
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
 
 function AppHeader({ navigation }) {
+  const { colors } = useTheme()
   return (
-    <SafeAreaView style={{ backgroundColor: "#8dc9a4" }}>
-      <View style={styles.header}>
+    <SafeAreaView style={{ backgroundColor: colors.header }}>
+      <View style={[styles.header, { backgroundColor: colors.header }]}>
         <TouchableOpacity onPress={() => navigation.navigate("Chat")}>
-          <Text style={styles.headerBtn}>Chat</Text>
+          <Text style={[styles.headerBtn, { color: colors.headerText }]}>Chat</Text>
         </TouchableOpacity>
-
-           <View style={styles.logoContainer}>
-    <Image
-      source={require("../assets/Foodi_logo.png")}
-      style={styles.logo}
-      resizeMode="contain"
-    />
-  </View>
-
+        <View style={styles.logoContainer}>
+          <Image
+            source={require("../assets/Foodi_logo.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </View>
         <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
-          <Text style={styles.headerBtn}>Settings</Text>
+          <Text style={[styles.headerBtn, { color: colors.headerText }]}>Settings</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -39,10 +38,12 @@ function AppHeader({ navigation }) {
 }
 
 function TabNavigator({ navigation }) {
+  const { colors } = useTheme()
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <AppHeader navigation={navigation} />
-      <Tab.Navigator initialRouteName="Home"
+      <Tab.Navigator
+        initialRouteName="Home"
         screenOptions={({ route }) => ({
           headerShown: false,
           tabBarIcon: ({ color, size }) => {
@@ -52,12 +53,16 @@ function TabNavigator({ navigation }) {
             if (route.name === "Map") icon = "map"
             return <Ionicons name={icon} size={size} color={color} />
           },
-          tabBarActiveTintColor: "blue",
-          tabBarInactiveTintColor: "gray",
+          tabBarActiveTintColor: colors.categoryText,
+          tabBarInactiveTintColor: colors.hint,
           tabBarStyle: {
-            backgroundColor: "#8dc9a4",
-            borderTopWidth: 0,
+            backgroundColor: colors.tabBar,
+            borderTopColor: colors.tabBarBorder,
+            borderTopWidth: 1,
             height: 100,
+          },
+          tabBarLabelStyle: {
+            color: colors.text,
           },
         })}
       >
@@ -69,7 +74,7 @@ function TabNavigator({ navigation }) {
           component={ChatScreen}
           options={{
             tabBarButton: () => null,
-            tabBarItemStyle: { display: "none" }
+            tabBarItemStyle: { display: "none" },
           }}
         />
       </Tab.Navigator>
@@ -77,10 +82,11 @@ function TabNavigator({ navigation }) {
   )
 }
 
-export default function BottomTabs() {
+export default function RootNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Main" component={TabNavigator} />
+      <Stack.Screen name="Auth" component={Auth} />
+      <Stack.Screen name="Tabs" component={TabNavigator} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
     </Stack.Navigator>
   )
@@ -93,21 +99,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 48,
-    backgroundColor: "#8dc9a4",
     position: "relative",
   },
   headerBtn: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#333",
     width: 80,
   },
-
+  logoContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    alignItems: "center",
+  },
   logo: {
-  width: 100,
-  height: 50,
-  position: "absolute",
-  left: "50%",
-  transform: [{ translateX: -50 }],
-}
+    width: 100,
+    height: 50,
+  },
 })
