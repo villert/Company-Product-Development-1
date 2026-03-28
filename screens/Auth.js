@@ -5,11 +5,29 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, si
 import { getFirestore, doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { firebaseApp } from '../firebase'
 import { useTheme } from '../context/ThemeContext'
+import { useLanguage } from '../context/LanguageContext'
 
 const auth = getAuth(firebaseApp)
 const db = getFirestore(firebaseApp)
+const getFirebaseErrorMessage = (code, t) => {
+  switch (code) {
+    case 'auth/email-already-in-use':
+      return t('emailInUse');
+    case 'auth/invalid-email':
+      return t('invalidEmail');
+    case 'auth/user-not-found':
+      return t('userNotFound');
+    case 'auth/wrong-password':
+      return t('wrongPassword');
+    case 'auth/weak-password':
+      return t('weakPassword');
+    default:
+      return t('unknownError');
+  }
+};
 
 export default function Auth({ navigation }) {
+  const {t} = useLanguage()
   const { colors, isDark } = useTheme()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -17,22 +35,22 @@ export default function Auth({ navigation }) {
   const [isRegister, setIsRegister] = useState(false)
 
   const handleRegister = async () => {
-    if (!name || !email || !password) { Alert.alert('Please fill all fields'); return }
+    if (!name || !email || !password) { Alert.alert(t('error'), t('fillAllFields')); return }
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       await setDoc(doc(db, 'users', userCredential.user.uid), {
         name, email, createdAt: serverTimestamp(), status: 'online'
       })
       navigation.navigate('Tabs')
-    } catch (error) { Alert.alert('Error', error.message) }
+    } catch (error) { Alert.alert(t('error'), getFirebaseErrorMessage(error.code, t)) }
   }
 
   const handleLogin = async () => {
-    if (!email || !password) { Alert.alert('Please fill all fields'); return }
+    if (!email || !password) { Alert.alert(t('error'), t('fillAllFields')); return }
     try {
       await signInWithEmailAndPassword(auth, email, password)
       navigation.navigate('Tabs')
-    } catch (error) { Alert.alert('Error', error.message) }
+    } catch (error) { Alert.alert(t('error'), getFirebaseErrorMessage(error.code, t)) }
   }
 
   const handleGuest = async () => {
@@ -42,7 +60,7 @@ export default function Auth({ navigation }) {
         status: 'guest', createdAt: serverTimestamp()
       })
       navigation.navigate('Tabs')
-    } catch (error) { Alert.alert('Error', error.message) }
+    } catch (error) { Alert.alert(t('error'), getFirebaseErrorMessage(error.code, t)) }
   }
 
   return (
@@ -95,7 +113,7 @@ export default function Auth({ navigation }) {
         style={[styles.guestButton, { backgroundColor: colors.card, borderColor: '#4A90E2' }]}
         onPress={handleGuest}
       >
-        <Text style={[styles.guestText, { color: colors.text }]}>Continue as Guest</Text>
+        <Text style={[styles.guestText, { color: colors.text }]}>{t('continue')}</Text>
       </TouchableOpacity>
     </View>
   )

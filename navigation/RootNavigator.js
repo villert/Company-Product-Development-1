@@ -10,17 +10,19 @@ import ChatScreen from "../screens/ChatScreen"
 import SettingsScreen from "../screens/SettingsScreen"
 import Auth from "../screens/Auth"
 import { useTheme } from "../context/ThemeContext"
+import { useLanguage } from "../context/LanguageContext"
 
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
 
 function AppHeader({ navigation }) {
   const { colors, isDark } = useTheme()
+  const {t} = useLanguage()
   return (
     <SafeAreaView style={{ backgroundColor: colors.header }}>
       <View style={[styles.header, { backgroundColor: colors.header }]}>
         <TouchableOpacity onPress={() => navigation.navigate("Chat")}>
-          <Text style={[styles.headerBtn, { color: colors.headerText }]}>Chat</Text>
+          <Text style={[styles.headerBtn, { color: colors.headerText }]}>{t('chat')}</Text>
         </TouchableOpacity>
         <View style={styles.logoContainer}>
           <Image
@@ -30,7 +32,7 @@ function AppHeader({ navigation }) {
           />
         </View>
         <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
-          <Text style={[styles.headerBtn, { color: colors.headerText }]}>Settings</Text>
+          <Text style={[styles.headerBtn, { color: colors.headerText }]}>{t('settings')}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

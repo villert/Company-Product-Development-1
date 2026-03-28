@@ -11,6 +11,7 @@ import {
 import { getAuth } from 'firebase/auth'
 import { firebaseApp } from '../firebase'
 import { useTheme } from '../context/ThemeContext'
+import { useLanguage } from '../context/LanguageContext'
 
 const db = getFirestore(firebaseApp)
 const auth = getAuth(firebaseApp)
@@ -49,6 +50,7 @@ function Avatar({ name, photoURL, size = 32 }) {
 
 export default function ChatScreen({ navigation }) {
   const { colors, isDark } = useTheme()
+  const {t} = useLanguage()
   const [messages, setMessages] = useState([])
   const [text, setText] = useState('')
   const [currentUser, setCurrentUser] = useState({ name: 'Guest', photoURL: null })
@@ -129,7 +131,7 @@ export default function ChatScreen({ navigation }) {
     <SafeAreaView style={{ backgroundColor: colors.header }}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={[styles.headerBtn, { color: colors.headerText }]}>Back</Text>
+          <Text style={[styles.headerBtn, { color: colors.headerText }]}>{t('back')}</Text>
         </TouchableOpacity>
         <Image
           source={isDark ? require('../assets/Foodi_logo_white.png') : require('../assets/Foodi_logo.png')}
@@ -163,7 +165,7 @@ export default function ChatScreen({ navigation }) {
           returnKeyType="send"
         />
         <TouchableOpacity style={[styles.button, { backgroundColor: colors.myBubble }]} onPress={handleSend}>
-          <Text style={[styles.buttonText, { color: colors.headerText }]}>Send</Text>
+          <Text style={[styles.buttonText, { color: colors.headerText }]}>{t('send')}</Text>
         </TouchableOpacity>
       </View>
     </View>

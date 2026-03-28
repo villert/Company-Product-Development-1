@@ -10,6 +10,7 @@ import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore"
 import { getAuth } from "firebase/auth"
 import { firebaseApp } from "../firebase"
 import { useTheme } from "../context/ThemeContext"
+import { useLanguage } from "../context/LanguageContext"
 
 const db = getFirestore(firebaseApp)
 const auth = getAuth(firebaseApp)
@@ -43,6 +44,7 @@ export default function SettingsScreen() {
   const [editingName, setEditingName] = useState(false)
   const [draftName, setDraftName] = useState("")
   const [saving, setSaving] = useState(false)
+  const [language, toggleLanguage, t] = useLanguage()
 
   const uid = auth.currentUser?.isAnonymous ? null : auth.currentUser?.uid
 
@@ -130,6 +132,19 @@ export default function SettingsScreen() {
           onValueChange={toggleTheme}
           trackColor={{ false: '#ccc', true: colors.myBubble }}
           thumbColor={isDark ? colors.headerText : '#fff'}
+        />
+      </View>
+
+      {/* Language toggle */}
+      <View style={[styles.settingRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <Text style={[styles.settingLabel, { color: colors.text }]}>
+          {language ? 'Suomi' : 'English'}
+        </Text>
+        <Switch
+          value={language}
+          onValueChange={toggleLanguage}
+          trackColor={{ false: '#ccc', true: colors.myBubble }}
+          thumbColor={language ? colors.headerText : '#fff'}
         />
       </View>
     </SafeAreaView>

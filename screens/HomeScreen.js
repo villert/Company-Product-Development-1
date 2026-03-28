@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { View, Text, StyleSheet, Pressable } from 'react-native'
 import * as Location from 'expo-location'
 import { useTheme } from '../context/ThemeContext'
+import { useLanguage } from '../context/LanguageContext'
 
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
   const R = 6371
@@ -38,6 +39,7 @@ const RESTAURANTS = [
 
 export default function HomeScreen({ navigation }) {
   const { colors } = useTheme()
+  const {t} = useLanguage ()
   const [userLocation, setUserLocation] = useState(null)
 
   useEffect(() => {
@@ -59,7 +61,7 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.header, { color: colors.headerText }]}>Restaurants</Text>
+      <Text style={[styles.header, { color: colors.headerText }]}>{t('restaurant')}</Text>
       {RESTAURANTS.map(item => {
         const distance = userLocation
           ? getDistanceFromLatLonInKm(
@@ -75,15 +77,15 @@ export default function HomeScreen({ navigation }) {
           >
             <Text style={[styles.name, { color: colors.headerText }]}>{item.name}</Text>
             <View style={styles.infoRow}>
-              <Text style={[styles.label, { color: colors.subText }]}>Price</Text>
+              <Text style={[styles.label, { color: colors.subText }]}>{t('price')}</Text>
               <Text style={[styles.value, { color: colors.text }]}>{item.price}</Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={[styles.label, { color: colors.subText }]}>Distance</Text>
+              <Text style={[styles.label, { color: colors.subText }]}>{t('distance')}</Text>
               <Text style={[styles.value, { color: colors.text }]}>{distance}</Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={[styles.label, { color: colors.subText }]}>Reviews</Text>
+              <Text style={[styles.label, { color: colors.subText }]}>{t('reviews')}</Text>
               <Text style={[styles.value, { color: colors.text }]}>{item.reviews}</Text>
             </View>
           </Pressable>
