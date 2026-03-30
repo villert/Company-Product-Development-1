@@ -6,11 +6,11 @@ import Constants from "expo-constants"
 
 const firebaseConfig = {
   apiKey: Constants.expoConfig.extra.firebaseApiKey,
-  authDomain: "copd-database.firebaseapp.com",
-  projectId: "copd-database",
-  storageBucket: "copd-database.appspot.com",
-  messagingSenderId: "77079651861",
-  appId: "1:77079651861:web:942e414956436d7245101c",
+  authDomain: Constants.expoConfig.extra.firebaseAuthDomain,
+  projectId: Constants.expoConfig.extra.firebaseProjectId,
+  storageBucket: Constants.expoConfig.extra.firebaseStorageBucket,
+  messagingSenderId: Constants.expoConfig.extra.firebaseMessagingSenderId,
+  appId: Constants.expoConfig.extra.firebaseAppId,
 }
 
 const app = initializeApp(firebaseConfig)
