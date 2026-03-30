@@ -37,17 +37,9 @@ cd Company-Product-Development-1
 npm install
 ```
 
-### 3. Create your environment file
-
-Copy `.env.example` to `.env` and add your Firebase project values:
-
-```env
-FIREBASE_API_KEY=your_firebase_api_key_here
-FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-FIREBASE_PROJECT_ID=your-project-id
-FIREBASE_STORAGE_BUCKET=your-project.appspot.com
-FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-FIREBASE_APP_ID=your_firebase_app_id
+2. Create a `.env` file
+```
+   FIREBASE_API_KEY=your_key_here
 ```
 
 ### 4. Start the app
