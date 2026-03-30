@@ -39,7 +39,7 @@ export default function Auth({ navigation }) {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       await setDoc(doc(db, 'users', userCredential.user.uid), {
-        name, email, createdAt: serverTimestamp(), status: 'online'
+        name, createdAt: serverTimestamp(), status: 'online'
       })
       navigation.navigate('Tabs')
     } catch (error) { Alert.alert(t('error'), getFirebaseErrorMessage(error.code, t)) }
@@ -72,7 +72,7 @@ export default function Auth({ navigation }) {
       />
       {isRegister && (
         <TextInput
-          placeholder="Name"
+          placeholder={t('name')}
           placeholderTextColor={colors.subText}
           value={name}
           onChangeText={setName}
@@ -80,7 +80,7 @@ export default function Auth({ navigation }) {
         />
       )}
       <TextInput
-        placeholder="Email"
+        placeholder={t('email')}
         placeholderTextColor={colors.subText}
         value={email}
         onChangeText={setEmail}
@@ -89,7 +89,7 @@ export default function Auth({ navigation }) {
         style={[styles.input, { backgroundColor: colors.card, color: colors.text }]}
       />
       <TextInput
-        placeholder="Password"
+        placeholder={t('password')}
         placeholderTextColor={colors.subText}
         value={password}
         onChangeText={setPassword}
@@ -101,12 +101,12 @@ export default function Auth({ navigation }) {
         onPress={isRegister ? handleRegister : handleLogin}
       >
         <Text style={[styles.buttonText, { color: colors.text }]}>
-          {isRegister ? 'Register' : 'Login'}
+          {isRegister ? t('register') : t('login')}
         </Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => setIsRegister(!isRegister)}>
         <Text style={[styles.toggleText, { color: colors.headerText }]}>
-          {isRegister ? 'Already have an account? Login' : "Don't have an account? Register"}
+          {isRegister ? t('alreadyHaveAccount') : t('noAccount')}
         </Text>
       </TouchableOpacity>
       <TouchableOpacity

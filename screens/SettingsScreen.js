@@ -7,7 +7,7 @@ import {
 import { useNavigation } from "@react-navigation/native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore"
-import { getAuth } from "firebase/auth"
+import { getAuth, signOut } from "firebase/auth"
 import { firebaseApp } from "../firebase"
 import { useTheme } from "../context/ThemeContext"
 import { useLanguage } from "../context/LanguageContext"
@@ -44,7 +44,8 @@ export default function SettingsScreen() {
   const [editingName, setEditingName] = useState(false)
   const [draftName, setDraftName] = useState("")
   const [saving, setSaving] = useState(false)
-  const [language, toggleLanguage, t] = useLanguage()
+  const { language, toggleLanguage, t } = useLanguage()
+  const isFinnish = language === "fi"
 
   const uid = auth.currentUser?.isAnonymous ? null : auth.currentUser?.uid
 
@@ -73,15 +74,26 @@ export default function SettingsScreen() {
 
   const handleStartEdit = () => { setDraftName(name); setEditingName(true) }
   const handleCancel = () => { setEditingName(false); setDraftName("") }
+  const handleLogout = async () => {
+    try {
+      await signOut(auth)
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Auth" }],
+      })
+    } catch (e) {
+      Alert.alert(t("error"), t("unknownError"))
+    }
+  }
 
   return (
     <SafeAreaView style={[{ flex: 1 }, { backgroundColor: colors.background }]} edges={["left", "right"]}>
       {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.header }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={[styles.backBtn, { color: colors.headerText }]}>Back</Text>
+          <Text style={[styles.backBtn, { color: colors.headerText }]}>{t("back")}</Text>
         </TouchableOpacity>
-        <Text style={[styles.title, { color: colors.headerText }]}>Settings</Text>
+        <Text style={[styles.title, { color: colors.headerText }]}>{t("settings")}</Text>
         <View style={{ width: 50 }} />
       </View>
 
@@ -91,8 +103,8 @@ export default function SettingsScreen() {
 
         {!uid ? (
           <View style={styles.nameRow}>
-            <Text style={[styles.nameText, { color: colors.text }]}>Guest</Text>
-            <Text style={[styles.editHint, { color: colors.hint }]}>Log in to edit your profile</Text>
+            <Text style={[styles.nameText, { color: colors.text }]}>{t("guest")}</Text>
+            <Text style={[styles.editHint, { color: colors.hint }]}>{t("loginToEditProfile")}</Text>
           </View>
         ) : editingName ? (
           <View style={styles.nameEditRow}>
@@ -126,7 +138,7 @@ export default function SettingsScreen() {
 
       {/* Dark mode toggle */}
       <View style={[styles.settingRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={[styles.settingLabel, { color: colors.text }]}>Dark Mode</Text>
+        <Text style={[styles.settingLabel, { color: colors.text }]}>{t("darkMode")}</Text>
         <Switch
           value={isDark}
           onValueChange={toggleTheme}
@@ -138,15 +150,22 @@ export default function SettingsScreen() {
       {/* Language toggle */}
       <View style={[styles.settingRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Text style={[styles.settingLabel, { color: colors.text }]}>
-          {language ? 'Suomi' : 'English'}
+          {isFinnish ? "Suomi" : "English"}
         </Text>
         <Switch
-          value={language}
+          value={isFinnish}
           onValueChange={toggleLanguage}
           trackColor={{ false: '#ccc', true: colors.myBubble }}
-          thumbColor={language ? colors.headerText : '#fff'}
+          thumbColor={isFinnish ? colors.headerText : '#fff'}
         />
       </View>
+
+      <TouchableOpacity
+        style={[styles.logoutButton, { backgroundColor: colors.card, borderColor: colors.border }]}
+        onPress={handleLogout}
+      >
+        <Text style={[styles.logoutText, { color: colors.text }]}>{t("logout")}</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   )
 }
@@ -207,4 +226,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   settingLabel: { fontSize: 16, fontWeight: "500" },
+  logoutButton: {
+    marginTop: 24,
+    marginHorizontal: 20,
+    paddingVertical: 16,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: "center",
+  },
+  logoutText: { fontSize: 16, fontWeight: "700" },
 })

@@ -1,5 +1,5 @@
 // screens/ChatScreen.js
-import React, { useEffect, useState, useRef } from 'react'
+import React, { memo, useEffect, useState, useRef } from 'react'
 import {
   View, Text, TextInput, TouchableOpacity, FlatList,
   StyleSheet, Image, SafeAreaView
@@ -18,7 +18,7 @@ const auth = getAuth(firebaseApp)
 
 const senderCache = {}
 
-function Avatar({ name, photoURL, size = 32 }) {
+const Avatar = memo(function Avatar({ name, photoURL, size = 32 }) {
   const initials = name
     ? name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
     : '?'
@@ -46,14 +46,40 @@ function Avatar({ name, photoURL, size = 32 }) {
       <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: size * 0.38 }}>{initials}</Text>
     </View>
   )
-}
+})
+
+const MessageRow = memo(function MessageRow({ item, currentUid, currentUser, senderProfiles, colors, guestLabel }) {
+  const isMe = item.senderId === currentUid
+  const rawProfile = isMe
+    ? currentUser
+    : senderProfiles[item.senderId] || { name: item.senderName, photoURL: null }
+  const displayName =
+    rawProfile?.name?.trim() ||
+    item.senderName?.trim() ||
+    guestLabel
+  const profile = { ...rawProfile, name: displayName }
+
+  return (
+    <View style={[styles.row, isMe && styles.rowReverse]}>
+      <Avatar name={profile.name} photoURL={profile.photoURL} size={34} />
+      <View style={[
+        styles.bubble,
+        { backgroundColor: isMe ? colors.myBubble : colors.theirBubble },
+        isMe ? styles.myBubbleRadius : styles.theirBubbleRadius
+      ]}>
+        {!isMe && <Text style={[styles.sender, { color: colors.subText }]}>{profile.name}</Text>}
+        <Text style={[styles.messageText, { color: colors.text }]}>{item.text}</Text>
+      </View>
+    </View>
+  )
+})
 
 export default function ChatScreen({ navigation }) {
   const { colors, isDark } = useTheme()
   const {t} = useLanguage()
   const [messages, setMessages] = useState([])
   const [text, setText] = useState('')
-  const [currentUser, setCurrentUser] = useState({ name: 'Guest', photoURL: null })
+  const [currentUser, setCurrentUser] = useState({ name: t('guest'), photoURL: null })
   const [senderProfiles, setSenderProfiles] = useState({})
   const [currentUid, setCurrentUid] = useState(null)
   const flatListRef = useRef(null)
@@ -66,11 +92,11 @@ export default function ChatScreen({ navigation }) {
       const docSnap = await getDoc(doc(db, 'users', user.uid))
       if (docSnap.exists()) {
         const data = docSnap.data()
-        setCurrentUser({ name: data.name || 'Guest', photoURL: data.photoURL || null })
+        setCurrentUser({ name: data.name || '', photoURL: data.photoURL || null })
       }
     })
     return () => unsubscribeAuth()
-  }, [])
+  }, [t])
 
   const fetchSenderProfile = async (senderId) => {
     if (senderCache[senderId]) return
@@ -78,7 +104,7 @@ export default function ChatScreen({ navigation }) {
     const docSnap = await getDoc(doc(db, 'users', senderId))
     if (docSnap.exists()) {
       const data = docSnap.data()
-      senderCache[senderId] = { name: data.name || 'Guest', photoURL: data.photoURL || null }
+      senderCache[senderId] = { name: data.name || '', photoURL: data.photoURL || null }
       setSenderProfiles(prev => ({ ...prev, [senderId]: senderCache[senderId] }))
     }
   }
@@ -106,27 +132,6 @@ export default function ChatScreen({ navigation }) {
     setText('')
   }
 
-  const renderItem = ({ item }) => {
-    const isMe = item.senderId === currentUid
-    const profile = isMe
-      ? currentUser
-      : senderProfiles[item.senderId] || { name: item.senderName, photoURL: null }
-
-    return (
-      <View style={[styles.row, isMe && styles.rowReverse]}>
-        <Avatar name={profile.name} photoURL={profile.photoURL} size={34} />
-        <View style={[
-          styles.bubble,
-          { backgroundColor: isMe ? colors.myBubble : colors.theirBubble },
-          isMe ? styles.myBubbleRadius : styles.theirBubbleRadius
-        ]}>
-          {!isMe && <Text style={[styles.sender, { color: colors.subText }]}>{profile.name}</Text>}
-          <Text style={[styles.messageText, { color: colors.text }]}>{item.text}</Text>
-        </View>
-      </View>
-    )
-  }
-
   const ChatHeader = () => (
     <SafeAreaView style={{ backgroundColor: colors.header }}>
       <View style={styles.header}>
@@ -149,9 +154,22 @@ export default function ChatScreen({ navigation }) {
       <FlatList
         ref={flatListRef}
         data={messages}
-        renderItem={renderItem}
+        renderItem={({ item }) => (
+          <MessageRow
+            item={item}
+            currentUid={currentUid}
+            currentUser={currentUser}
+            senderProfiles={senderProfiles}
+            colors={colors}
+            guestLabel={t('guest')}
+          />
+        )}
         keyExtractor={item => item.id}
         contentContainerStyle={{ padding: 10 }}
+        initialNumToRender={20}
+        maxToRenderPerBatch={12}
+        windowSize={10}
+        removeClippedSubviews
         onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
       />
       <View style={[styles.inputContainer, { borderColor: colors.border, backgroundColor: colors.card }]}>

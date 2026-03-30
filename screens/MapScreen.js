@@ -58,10 +58,14 @@ export default function MapScreen() {
   return (
     <View style={styles.container}>
       <WebView
+        key={isDark ? 'dark-map' : 'light-map'}
         source={{ html: leafletHTML }}
         style={styles.map}
-        javaScriptEnabled={true}
+        javaScriptEnabled
         originWhitelist={['*']}
+        cacheEnabled
+        androidLayerType="hardware"
+        setSupportMultipleWindows={false}
       />
     </View>
   )

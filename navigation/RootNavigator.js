@@ -41,12 +41,16 @@ function AppHeader({ navigation }) {
 
 function TabNavigator({ navigation }) {
   const { colors } = useTheme()
+  const { t } = useLanguage()
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <AppHeader navigation={navigation} />
       <Tab.Navigator
         initialRouteName="Home"
+        detachInactiveScreens
         screenOptions={({ route }) => ({
+          lazy: true,
+          freezeOnBlur: true,
           headerShown: false,
           tabBarIcon: ({ color, size }) => {
             let icon
@@ -68,9 +72,22 @@ function TabNavigator({ navigation }) {
           },
         })}
       >
-        <Tab.Screen name="List" component={ListScreen} initialParams={{ restaurantName: null }} />
-        <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen name="Map" component={MapScreen} />
+        <Tab.Screen
+          name="List"
+          component={ListScreen}
+          initialParams={{ restaurantName: null }}
+          options={{ tabBarLabel: t("list") }}
+        />
+        <Tab.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{ tabBarLabel: t("home") }}
+        />
+        <Tab.Screen
+          name="Map"
+          component={MapScreen}
+          options={{ tabBarLabel: t("map"), unmountOnBlur: true }}
+        />
       </Tab.Navigator>
     </View>
   )
