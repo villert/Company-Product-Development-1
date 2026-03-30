@@ -17,7 +17,7 @@ A React Native restaurant discovery app built as part of a school course project
    npm install
 ```
 
-2. Create a `.env` file
+2. Use the `.env.example` file and remove the .example from it, and add your API key to it like so.
 ```
    FIREBASE_API_KEY=your_key_here
 ```
