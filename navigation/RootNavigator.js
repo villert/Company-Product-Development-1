@@ -21,6 +21,8 @@ function AppHeader({ navigation }) {
   return (
     <SafeAreaView style={{ backgroundColor: colors.header }}>
       <View style={[styles.header, { backgroundColor: colors.header }]}>
+        {/* This button opens the chat screen. */}
+        {/* Chat is not shown as a normal bottom tab, so we reach it from the header instead. */}
         <TouchableOpacity onPress={() => navigation.navigate("Chat")}>
           <Text style={[styles.headerBtn, { color: colors.headerText }]}>{t('chat')}</Text>
         </TouchableOpacity>
@@ -44,11 +46,13 @@ function TabNavigator({ navigation }) {
   const { t } = useLanguage()
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
+      {/* The custom header is shown above the tabs on every main screen. */}
       <AppHeader navigation={navigation} />
       <Tab.Navigator
         initialRouteName="Home"
         detachInactiveScreens
         screenOptions={({ route }) => ({
+          // These settings help performance by doing less work for tabs that are not open right now.
           lazy: true,
           freezeOnBlur: true,
           headerShown: false,
@@ -76,6 +80,7 @@ function TabNavigator({ navigation }) {
           name="List"
           component={ListScreen}
           initialParams={{ restaurantName: null }}
+          // The List screen can open normally, or another screen can send it a restaurant name.
           options={{ tabBarLabel: t("list") }}
         />
         <Tab.Screen
@@ -86,6 +91,7 @@ function TabNavigator({ navigation }) {
         <Tab.Screen
           name="Map"
           component={MapScreen}
+          // Rebuilding the map screen on revisit helps clear old temporary map state.
           options={{ tabBarLabel: t("map"), unmountOnBlur: true }}
         />
       </Tab.Navigator>
@@ -96,6 +102,8 @@ function TabNavigator({ navigation }) {
 export default function RootNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {/* This stack controls the top-level app flow. */}
+      {/* The user starts at Auth, then moves into Tabs, and can also open Chat or Settings. */}
       <Stack.Screen name="Auth" component={Auth} />
       <Stack.Screen name="Tabs" component={TabNavigator} />
       <Stack.Screen name="Chat" component={ChatScreen} />

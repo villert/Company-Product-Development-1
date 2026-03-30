@@ -6,6 +6,8 @@ import { useTheme } from '../context/ThemeContext'
 import { useLanguage } from '../context/LanguageContext'
 
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+  // This helper calculates the distance between 2 map locations.
+  // It returns the result in kilometers.
   const R = 6371
   const dLat = ((lat2 - lat1) * Math.PI) / 180
   const dLon = ((lon2 - lon1) * Math.PI) / 180
@@ -19,6 +21,7 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
 }
 
 const RESTAURANTS = [
+  // Example restaurant data shown on the home screen.
   {
     id: '1',
     name: 'Mara',
@@ -43,17 +46,22 @@ export default function HomeScreen({ navigation }) {
   const [userLocation, setUserLocation] = useState(null)
 
   useEffect(() => {
+    // Ask the phone for the user's location when this screen opens.
     ;(async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync()
         if (status !== 'granted') {
+          // If permission is denied, use a default location so the screen still works.
           setUserLocation({ latitude: 65.0322, longitude: 25.4626 })
           return
         }
+
+        // Low accuracy is enough here because we only need an approximate distance.
         const location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low })
         setUserLocation(location.coords)
       } catch (error) {
         console.warn('Location error, using default:', error)
+        // If location lookup fails for any other reason, use the same default location.
         setUserLocation({ latitude: 65.0322, longitude: 25.4626 })
       }
     })()
@@ -63,6 +71,8 @@ export default function HomeScreen({ navigation }) {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Text style={[styles.header, { color: colors.headerText }]}>{t('restaurant')}</Text>
       {RESTAURANTS.map(item => {
+        // If we know the user's location, show the distance to this restaurant.
+        // Otherwise, show a short loading message.
         const distance = userLocation
           ? getDistanceFromLatLonInKm(
               userLocation.latitude, userLocation.longitude,
@@ -72,6 +82,7 @@ export default function HomeScreen({ navigation }) {
         return (
           <Pressable
             key={item.id}
+            // Open the List screen and tell it which restaurant the user selected.
             onPress={() => navigation.navigate('List', { restaurantName: item.name })}
             style={({ pressed }) => [styles.card, { backgroundColor: colors.card }, pressed && { opacity: 0.7 }]}
           >

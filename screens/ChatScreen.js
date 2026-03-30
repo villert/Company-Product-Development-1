@@ -16,9 +16,12 @@ import { useLanguage } from '../context/LanguageContext'
 const db = getFirestore(firebaseApp)
 const auth = getAuth(firebaseApp)
 
+// We save sender profiles here after loading them once.
+// This makes the chat faster because we do not ask Firestore for the same user many times.
 const senderCache = {}
 
 const Avatar = memo(function Avatar({ name, photoURL, size = 32 }) {
+  // If we do not have a profile image, we show up to 2 initials from the user's name.
   const initials = name
     ? name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
     : '?'
@@ -26,12 +29,15 @@ const Avatar = memo(function Avatar({ name, photoURL, size = 32 }) {
   if (photoURL) {
     return (
       <Image
+        // Show the real profile image when one is available.
         source={{ uri: photoURL }}
         style={{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden' }}
       />
     )
   }
 
+  // If there is no image, give the user a colored circle with initials instead.
+  // The color is based on the name so the same person keeps the same color.
   const avatarColors = ['#f28b82', '#fbbc04', '#34a853', '#4285f4', '#a142f4', '#ff6d00', '#00bcd4']
   const colorIndex = name
     ? name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % avatarColors.length
@@ -50,6 +56,8 @@ const Avatar = memo(function Avatar({ name, photoURL, size = 32 }) {
 
 const MessageRow = memo(function MessageRow({ item, currentUid, currentUser, senderProfiles, colors, guestLabel }) {
   const isMe = item.senderId === currentUid
+  // For your own messages, use your current profile data.
+  // For other people's messages, use the profile we loaded earlier.
   const rawProfile = isMe
     ? currentUser
     : senderProfiles[item.senderId] || { name: item.senderName, photoURL: null }
@@ -85,10 +93,14 @@ export default function ChatScreen({ navigation }) {
   const flatListRef = useRef(null)
 
   useEffect(() => {
+    // This runs when the screen opens and whenever the logged-in user changes.
+    // It tells us who is using the app right now, so we can mark their own messages correctly.
     const unsubscribeAuth = auth.onAuthStateChanged(async (user) => {
       if (!user) return
       setCurrentUid(user.uid)
       if (user.isAnonymous) return
+
+      // If the user has a saved profile in Firestore, use that name and image in chat.
       const docSnap = await getDoc(doc(db, 'users', user.uid))
       if (docSnap.exists()) {
         const data = docSnap.data()
@@ -100,6 +112,8 @@ export default function ChatScreen({ navigation }) {
 
   const fetchSenderProfile = async (senderId) => {
     if (senderCache[senderId]) return
+    // Mark this user as already requested right away.
+    // This stops multiple chat updates from fetching the same profile at the same time.
     senderCache[senderId] = true
     const docSnap = await getDoc(doc(db, 'users', senderId))
     if (docSnap.exists()) {
@@ -110,10 +124,15 @@ export default function ChatScreen({ navigation }) {
   }
 
   useEffect(() => {
+    // Listen to the "general" chat room in real time.
+    // When a new message is added in Firestore, the list on screen updates automatically.
     const q = query(collection(db, 'chats', 'general', 'messages'), orderBy('createdAt', 'asc'))
     const unsubscribe = onSnapshot(q, snapshot => {
       const msgs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }))
       setMessages(msgs)
+
+      // Messages can appear before we know each sender's full profile.
+      // This extra step loads names and photos for users we have not seen yet.
       msgs.forEach(msg => {
         if (msg.senderId && !senderCache[msg.senderId]) fetchSenderProfile(msg.senderId)
       })
@@ -123,6 +142,10 @@ export default function ChatScreen({ navigation }) {
 
   const handleSend = async () => {
     if (!text.trim()) return
+
+    // Save the message to Firestore.
+    // We also save senderName directly in the message so the app can still show a name
+    // even if the full profile has not loaded yet.
     await addDoc(collection(db, 'chats', 'general', 'messages'), {
       text: text.trim(),
       senderId: auth.currentUser.uid,
@@ -133,6 +156,7 @@ export default function ChatScreen({ navigation }) {
   }
 
   const ChatHeader = () => (
+    // This is a small custom header for the chat screen.
     <SafeAreaView style={{ backgroundColor: colors.header }}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -155,6 +179,7 @@ export default function ChatScreen({ navigation }) {
         ref={flatListRef}
         data={messages}
         renderItem={({ item }) => (
+          // Render one message bubble at a time.
           <MessageRow
             item={item}
             currentUid={currentUid}
@@ -170,6 +195,7 @@ export default function ChatScreen({ navigation }) {
         maxToRenderPerBatch={12}
         windowSize={10}
         removeClippedSubviews
+        // Whenever the list grows, scroll to the bottom so the newest message stays visible.
         onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
       />
       <View style={[styles.inputContainer, { borderColor: colors.border, backgroundColor: colors.card }]}>

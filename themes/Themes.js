@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native"
-// Luodaan keskittyy pala paskaa jotta voidaan nähdä nopeasti muutokset
+
+// These are small reusable styles for screens that need content centered on the page.
 export default StyleSheet.create({
   centeredContainer: {
     flex: 1,
@@ -10,5 +11,3 @@ export default StyleSheet.create({
     textAlign: "center"
   }
 })
-
-

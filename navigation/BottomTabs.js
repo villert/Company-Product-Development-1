@@ -21,6 +21,8 @@ function AppHeader({ navigation }) {
   return (
     <SafeAreaView style={{ backgroundColor: colors.header }}>
       <View style={[styles.header, { backgroundColor: colors.header }]}>
+        {/* This button opens the chat screen. */}
+        {/* Chat exists in navigation, but we hide it from the bottom tab bar. */}
         <TouchableOpacity onPress={() => navigation.navigate("Chat")}>
           <Text style={[styles.headerBtn, { color: colors.headerText }]}>{t('chat')}</Text>
         </TouchableOpacity>
@@ -43,10 +45,12 @@ function TabNavigator({ navigation }) {
   const { colors } = useTheme()
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
+      {/* The custom header stays above the bottom tabs. */}
       <AppHeader navigation={navigation} />
       <Tab.Navigator
         initialRouteName="Home"
         screenOptions={({ route }) => ({
+          // Every tab can have its own icon.
           headerShown: false,
           tabBarIcon: ({ color, size }) => {
             let icon
@@ -68,6 +72,7 @@ function TabNavigator({ navigation }) {
           },
         })}
       >
+        {/* The List screen can be opened without choosing a restaurant first. */}
         <Tab.Screen name="List" component={ListScreen} initialParams={{ restaurantName: null }} />
         <Tab.Screen name="Home" component={HomeScreen} />
         <Tab.Screen name="Map" component={MapScreen} />
@@ -75,6 +80,7 @@ function TabNavigator({ navigation }) {
           name="Chat"
           component={ChatScreen}
           options={{
+            // This keeps Chat available for navigation, but removes its button from the tab bar.
             tabBarButton: () => null,
             tabBarItemStyle: { display: "none" },
           }}
@@ -87,6 +93,8 @@ function TabNavigator({ navigation }) {
 export default function RootNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {/* This stack decides the main flow of the app. */}
+      {/* First the user sees Auth, and after that they move into the tab-based part of the app. */}
       <Stack.Screen name="Auth" component={Auth} />
       <Stack.Screen name="Tabs" component={TabNavigator} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
