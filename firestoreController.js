@@ -1,39 +1,36 @@
-// firestoreController.js
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDocFromServer } from "firebase/firestore";
 import { db } from "./firebase";
 
-// Get today's day in firestore format
-const getToday = () => {
-  return new Date()
+const getToday = () =>
+  new Date()
     .toLocaleDateString("en-US", { weekday: "long" })
     .toLowerCase();
-};
 
-export const fetchMenu = async (restaurantName) => {
-  const today = getToday();
+export const fetchMenu = async (restaurantName, day) => {
+  const docRef = doc(
+    db,
+    restaurantName.toLowerCase(),
+    day || getToday()
+  );
 
-  const docRef = doc(db, restaurantName.toLowerCase(), today);
-  const docSnap = await getDoc(docRef);
-
-  if (!docSnap.exists()) return null;
-
+  const docSnap = await getDocFromServer(docRef);
   const data = docSnap.data();
 
-  // Convert firestore data → UI format
-  const formattedMenu = Object.entries(data).map(([key, value]) => ({
-    category: {
-      en: key,
-      fi: key,
-    },
-    items: [
-      {
-        name: {
-          en: value,
-          fi: value,
-        },
-      },
-    ],
-  }));
+  const grouped = {};
 
-  return formattedMenu;
+  Object.entries(data).forEach(([key, value]) => {
+    const base = key.replace(/\d+/g, "");
+
+    grouped[base] = grouped[base] || [];
+    grouped[base].push(value);
+  });
+
+  return Object.entries(grouped)
+    .map(([category, items]) => ({
+      category: { en: category, fi: category },
+      items: items.map((item) => ({
+        name: { en: item, fi: item },
+      })),
+    }))
+    .sort((a, b) => a.category.en.localeCompare(b.category.en));
 };
