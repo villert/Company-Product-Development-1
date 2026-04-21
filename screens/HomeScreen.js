@@ -32,7 +32,7 @@ const RESTAURANTS = [
   },
   {
     id: '2',
-    name: 'Julinia',
+    name: 'Kerttu',
     price: '0,69 € / 1,29 € / 2,49 €',
     reviews: '3.8 ⭐ (40 reviews)',
     latitude: 65.06091260085284,
