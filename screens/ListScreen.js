@@ -21,7 +21,7 @@ export default function ListScreen({ route }) {
     if (!restaurantName) return
 
     setLoading(true)
-    fetchMenu(restaurantName, day).then((data) => {
+    fetchMenu(restaurantName, day, language).then((data) => {
       setMenu(data)
       setLoading(false)
     })

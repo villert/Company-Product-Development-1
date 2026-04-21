@@ -6,10 +6,15 @@ const getToday = () =>
     .toLocaleDateString("en-US", { weekday: "long" })
     .toLowerCase();
 
-export const fetchMenu = async (restaurantName, day) => {
+export const fetchMenu = async (restaurantName, day, language) => {
+  const collectionName =
+    language === "fi"
+      ? restaurantName.toLowerCase() + "Fi"
+      : restaurantName.toLowerCase();
+
   const docRef = doc(
     db,
-    restaurantName.toLowerCase(),
+    collectionName,
     day || getToday()
   );
 
@@ -20,7 +25,6 @@ export const fetchMenu = async (restaurantName, day) => {
 
   Object.entries(data).forEach(([key, value]) => {
     const base = key.replace(/\d+/g, "");
-
     grouped[base] = grouped[base] || [];
     grouped[base].push(value);
   });
